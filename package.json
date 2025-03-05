@@ -17,5 +17,8 @@
     "url": "https://github.com/SweatBoyz/checkers-game/issues"
   },
   "homepage": "https://github.com/SweatBoyz/checkers-game#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "ws": "^8.18.1"
+  }
 }
