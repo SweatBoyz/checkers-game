@@ -12,6 +12,10 @@ const wss = new WebSocket.Server({ noServer: true });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  
+  // Отправить сообщение о начале игры и цвете игрока
+  ws.send(JSON.stringify({ type: 'start', color: 'red' }));
+
   ws.on('message', (message) => {
     console.log('received: %s', message);
   });
