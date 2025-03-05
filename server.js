@@ -1,28 +1,34 @@
 const WebSocket = require('ws');
-const server = new WebSocket.Server({ port: 3000 });
+const http = require('http');
 
-let players = [];
-
-server.on('connection', (socket) => {
-    console.log('Игрок подключился');
-    players.push(socket);
-
-    if (players.length === 2) {
-        players[0].send(JSON.stringify({ type: 'start', color: 'red' }));
-        players[1].send(JSON.stringify({ type: 'start', color: 'blue' }));
-    }
-
-    socket.on('message', (message) => {
-        players.forEach((player) => {
-            if (player !== socket) {
-                player.send(message);
-            }
-        });
-    });
-
-    socket.on('close', () => {
-        players = players.filter(p => p !== socket);
-    });
+// Создание HTTP сервера
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello World\n');
 });
 
-console.log("Сервер запущен на порту 3000");
+// Создание WebSocket сервера
+const wss = new WebSocket.Server({ noServer: true });
+
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.on('message', (message) => {
+    console.log('received: %s', message);
+  });
+});
+
+// Обработчик upgrade-запросов для WebSocket
+server.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request);
+  });
+});
+
+// Используем порт, назначенный Render, или порт по умолчанию 3000
+const port = process.env.PORT || 3000;
+
+// Запуск сервера
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
