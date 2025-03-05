@@ -1,4 +1,4 @@
-const socket = new WebSocket('wss://your-server.onrender.com');
+const socket = new WebSocket('wss://checkers-game-dvwc.onrender.com');
 
 socket.addEventListener('open', () => {
     console.log("Соединение с сервером установлено");
