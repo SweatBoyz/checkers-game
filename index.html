@@ -9,9 +9,84 @@
 <body>
     <h1>Шашки Онлайн</h1>
     <button id="startGame">Начать игру</button>
+
+    <div id="game" style="display: none;">
+        <h2>Игра начинается!</h2>
+        <div id="board"></div>
+        <button id="endGame">Закончить игру</button>
+    </div>
+
     <script>
+        // Логика WebSocket
+        const socket = new WebSocket('wss://checkers-game-dvwc.onrender.com');
+
+        socket.addEventListener('open', () => {
+            console.log("Соединение с сервером установлено");
+        });
+
+        socket.addEventListener('message', (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'start') {
+                alert(`Вы играете за ${data.color}`);
+            }
+        });
+
+        // Доска для игры в шашки
+        const board = document.createElement('div');
+        board.id = 'board';
+        document.getElementById('game').appendChild(board);
+
+        const rows = 8, cols = 8;
+        let pieces = [];
+        let selectedPiece = null;
+
+        // Создаем клетки и расставляем шашки
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
+                board.appendChild(cell);
+
+                if ((row + col) % 2 === 1 && (row < 3 || row > 4)) {
+                    const piece = document.createElement('div');
+                    piece.classList.add('piece', row < 3 ? 'red' : 'blue');
+                    cell.appendChild(piece);
+                    pieces.push(piece);
+
+                    piece.addEventListener('click', () => {
+                        if (selectedPiece) {
+                            selectedPiece.classList.remove('selected');
+                        }
+                        piece.classList.add('selected');
+                        selectedPiece = piece;
+                    });
+                }
+            }
+        }
+
+        // Логика движения шашек
+        board.addEventListener('click', (event) => {
+            if (!selectedPiece) return;
+
+            const cell = event.target;
+            if (cell.classList.contains('cell') && !cell.contains(selectedPiece)) {
+                cell.appendChild(selectedPiece);
+                selectedPiece.classList.remove('selected');
+                selectedPiece = null;
+            }
+        });
+
+        // Начало игры
         document.getElementById('startGame').addEventListener('click', () => {
-            window.location.href = "/game.html";
+            document.querySelector('h1').style.display = 'none';
+            document.getElementById('startGame').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+        });
+
+        // Завершение игры
+        document.getElementById('endGame').addEventListener('click', () => {
+            alert('Игра завершена');
+            window.location.href = "/"; // Возврат на главную страницу
         });
     </script>
 </body>
